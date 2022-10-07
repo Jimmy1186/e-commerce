@@ -1,0 +1,121 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "mysql"
+    // NOTE: When using postgresql, mysql or sqlserver, uncomment the @db.Text annotations in model Account below
+    // Further reading: 
+    // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema
+    // https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#string
+    url      = env("DATABASE_URL")
+}
+
+// Necessary for Next auth
+model Account {
+    id                String  @id @default(cuid())
+    userId            String
+    type              String
+    provider          String
+    providerAccountId String
+    refresh_token     String?  @db.Text
+    access_token      String?  @db.Text
+    expires_at        Int?
+    token_type        String?
+    scope             String?
+    id_token          String?  @db.Text
+    session_state     String?
+    user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@unique([provider, providerAccountId])
+}
+
+model Session {
+    id           String   @id @default(cuid())
+    sessionToken String   @unique
+    userId       String
+    expires      DateTime
+    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+    id            String    @id @default(cuid())
+    name          String?
+    email         String?   @unique
+    emailVerified DateTime?
+    image         String?
+    accounts      Account[]
+    sessions      Session[]
+}
+
+model VerificationToken {
+    identifier String
+    token      String   @unique
+    expires    DateTime
+
+    @@unique([identifier, token])
+}
+
+model Product_configuration {
+    id                  Int              @id @default(autoincrement())
+    product_item_id     Int?
+    product_items       Product_item?    @relation(fields: [product_item_id], references: [id], onDelete: Cascade)
+    variation_option_id Int
+    variation_options   Variation_option @relation(fields: [variation_option_id], references: [variation_id], onDelete: Cascade)
+}
+
+model Product_image {
+    id         Int     @id @default(autoincrement())
+    img_path   String
+    product_id Int
+    products   Product @relation(fields: [product_id], references: [id], onDelete: Cascade)
+}
+
+model Product_item {
+    id                     Int                     @id @default(autoincrement())
+    qty_in_stock           Int
+    price                  Decimal                 @db.Decimal(8, 2)
+    product_id             Int
+    products               Product                 @relation(fields: [product_id], references: [id])
+    product_configurations Product_configuration[]
+}
+
+model Product {
+    id             Int               @id @default(autoincrement())
+    name           String
+    description    String
+    product_img    String?
+    category_id    Int               @unique
+    categorys      Product_category? @relation(fields: [category_id], references: [id])
+    product_items  Product_item[]
+    product_images Product_image[]
+}
+
+model Product_category {
+    id                 Int                @id @default(autoincrement())
+    category_name      String?
+    parent_category_id Int?
+    parent             Product_category?  @relation("parentCategory", fields: [parent_category_id], references: [id])
+    categorys          Product_category[] @relation("parentCategory")
+    products           Product?
+    variations         Variation[]
+}
+
+model Variation {
+    id                Int                @id @default(autoincrement())
+    name              String?
+    category_id       Int
+    categorys         Product_category   @relation(fields: [category_id], references: [id], onDelete: Cascade)
+    variation_options Variation_option[]
+}
+
+model Variation_option {
+    id                     Int                     @id @default(autoincrement())
+    variation_type         String?
+    variation_id           Int                     @unique
+    variations             Variation               @relation(fields: [variation_id], references: [id], onDelete: Cascade)
+    product_configurations Product_configuration[]
+}
