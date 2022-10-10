@@ -31,7 +31,7 @@ function EditableTextAria({
   const selectHandler = () => {
     if (!textareaRef.current) return;
 
-    let xxx = values.product_detail;
+    const xxx = values.product_detail;
     setSelectText(
       xxx.substring(
         textareaRef.current.selectionStart,
