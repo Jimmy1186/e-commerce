@@ -5,24 +5,27 @@ import { trpc } from "../../utils/trpc";
 import { Form, Formik } from "formik";
 import { z } from "zod";
 import { toFormikValidationSchema } from "zod-formik-adapter";
-import { createProductType, initialValues, createProductSchema } from "../../types/editor";
-import { Editor } from 'slate-react'
-import { Value } from 'slate'
+import {
+  createProductType,
+  initialValues,
+  createProductSchema,
+} from "../../types/editor";
+import dynamic from "next/dynamic";
+import "suneditor/dist/css/suneditor.min.css"; // Import Sun Editor's CSS File
 
+const SunEditor = dynamic(() => import("suneditor-react"), {
+  ssr: false,
+});
 
-
-
-
-
-
-
-
-
-
+function htmlToElement(html:string) {
+  var template = document.createElement('template');
+  html = html.trim(); // Never return a text node of whitespace as the result
+  template.innerHTML = html;
+  return template.content.firstChild;
+}
 
 function Index() {
   const { data: session } = useSession();
-  const [convertedContent, setConvertedContent] = useState<any>();
 
   const {
     data: category,
@@ -31,13 +34,24 @@ function Index() {
   } = trpc.admin.getCategory.useQuery(undefined, {
     staleTime: Infinity,
   });
+  const [html, setHtml] = useState("");
+  const handleDescriptionChange = (ct:any) => {
+    setHtml(ct);
+    console.log(html)
+  };
 
-
-
+  const handleImageUpload=(targetImgElement:HTMLElement, index:number, state:string, imageInfo:any, remainingFilesCount:number)=>{
+    // console.log(targetImgElement, index, state, imageInfo, remainingFilesCount)
+    if(targetImgElement===null) return
+    // console.log(targetImgElement.setAttribute())
+    // console.log(imageInfo.src)
+    const temp ="<div>lolo <div/>"
+    return targetImgElement.setAttribute("src","fk")
+  }
 
   const sumbitHandler = (values: createProductType, actions: any) => {
     // console.log(editorState);
-    console.log(convertedContent);
+
 
     console.log(values);
   };
@@ -90,7 +104,7 @@ function Index() {
                     >
                       {v.category_name}
                     </option>
-                  )
+                  );
                 })
               ) : (
                 <option disabled defaultValue={0}>
@@ -99,15 +113,32 @@ function Index() {
               )}
             </select>
             <div className="w-full">
-       
+              <SunEditor
+                lang="en"
+                name="product_detail"
+                onChange={handleChange('product_detail')}
+                onImageUpload={handleImageUpload}
+                setOptions={{
+                  height:"500px",
+                  buttonList: [
+                     ["codeView"],
+                    ["font", "fontSize", "formatBlock"],
+                    ["bold", "underline", "italic"],
+                    ["align", "horizontalRule", "list", "table"],
+                    ["fontColor", "hiliteColor"],
+                    ["link", 'image', 'video'],
+                   
+                  ],
+                }}
+              />
             </div>
             <div className=""></div>
-            {/* <div className="">
+            <div className="">
               <div
                 className="content flex flex-col"
-                dangerouslySetInnerHTML={{ __html: convertedContent }}
+                dangerouslySetInnerHTML={{ __html: values.product_detail }}
               />
-            </div> */}
+            </div>
 
             <button className="btn" type="submit" disabled={!isValid}>
               Button
@@ -120,5 +151,3 @@ function Index() {
 }
 
 export default Index;
-
-

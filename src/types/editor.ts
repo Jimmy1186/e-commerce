@@ -3,6 +3,7 @@ import { z } from "zod";
 export const initialValues = {
   product_title: "",
   product_category: "",
+  product_detail:""
 };
 
 export const createProductSchema = z.object({
