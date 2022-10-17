@@ -7,7 +7,8 @@ import Link from "next/link";
 import ImageCarousel from "../components/widget/ImageCarousel";
 
 const Home: NextPage = () => {
-  // const hello = trpc.example.hello.useQuery({ text: "from tRPC" });
+
+
 
   return (
     <>

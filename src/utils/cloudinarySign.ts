@@ -1,20 +1,22 @@
-import * as cloud from 'cloudinary'
-const apiSecret = cloud.v2.config().api_secret as string
 
-export const signuploadwidget = () => {
-    const timestamp = Math.round((new Date).getTime()/1000);
-  
-const signature = cloud.v2.utils.api_sign_request({
-    timestamp: timestamp,
-    source: 'uw',
-    folder: 'test_folder',
-}, apiSecret)
-  
-  return { timestamp, signature }
+
+
+type paramsType ={
+  timestamp: number,
+  source: string,
+  folder: string,
 }
 
-   
-  
-//   module.exports = {
-//     signuploadwidget
-//   }
+
+export function generateSignature(callback:any, paramsToSign:any) {
+  fetch(`/api/sign`, {
+    method: "POST",
+    body: JSON.stringify({
+      paramsToSign,
+    }),
+  })
+    .then((r) => r.json())
+    .then(({ signature }) => {
+      callback(signature);
+    });
+}

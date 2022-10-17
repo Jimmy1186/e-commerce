@@ -70,6 +70,7 @@ model Product_configuration {
 model Product_image {
     id         Int     @id @default(autoincrement())
     img_path   String
+    index_of   Int
     product_id Int
     products   Product @relation(fields: [product_id], references: [id], onDelete: Cascade)
 }
