@@ -1,39 +1,51 @@
 import React from "react";
 import Image from "next/image";
-import { createProductType } from "../../types/editor";
-
-type uploadImgType = {
-  values: createProductType;
-  setFieldValue: (title: string, setValue: Array<object>) => void;
-};
-
-const convertBase64 = (file: Array<Blob>) => {
-  return new Promise((resolve, reject) => {
-    let plm: object[] = [];
-
-    file.map((v, i) => {
-      let fileReader = new FileReader();
-      fileReader.readAsDataURL(v);
-      fileReader.onload = () => {
-        plm[i] = { img_path: fileReader.result, index_of: 1};
-      };
-    });
-    resolve(plm);
-  });
-};
-
-const uploadImage = (event: React.ChangeEvent<HTMLInputElement>) => {
-  return Object.entries(event.target.files || {}).map(([s, f]) => {
-    
-    return { img_path: f, index_of: Number(s) };
-  });
-};
+import { createProductType, uploadImgType } from "../../types/editor";
+import { imgPayloadConvert } from "../../utils/functions";
+import { generateSignature } from "../../utils/cloudinarySign";
 
 function UploadImage({ values, setFieldValue }: uploadImgType) {
+  async function handleWidgetClick() {
+    const widget = window.cloudinary.createUploadWidget(
+      {
+        cloudName: process.env.NEXT_PUBLIC_CLOUDINARY_NAME,
+        uploadSignature: generateSignature,
+        apiKey: process.env.NEXT_PUBLIC_CLOUDINARY_KEY,
+        resourceType: "image",
+        folder: "my_test",
+      },
+      (error: any, result: any) => {
+        if (!error && result && result.event === "success") {
+
+    
+          const oldV     =  values.product_image
+          const newV = [...oldV,{ img_path: result.info.url, index_of: 0 }]
+
+       
+
+          setFieldValue("product_image",newV);
+          // setIsImageUploaded(true);
+        } else if (error) {
+          console.log(error);
+        }
+      }
+    );
+    widget.open();
+  }
+
+
 
   return (
     <>
-      {values.product_image.length != 0
+      <div className="h-10 w-10 bg-red-500" onClick={handleWidgetClick}></div>
+    </>
+  );
+}
+
+export default UploadImage;
+
+{
+  /* {values.product_image.length != 0
         ? values.product_image.map((v: any, i) => {
             return (
               <div key={i}>
@@ -62,9 +74,7 @@ function UploadImage({ values, setFieldValue }: uploadImgType) {
           })
         : ""}
 
-      <br />
 
-      <br />
 
       <input
         type="file"
@@ -72,11 +82,8 @@ function UploadImage({ values, setFieldValue }: uploadImgType) {
         name="myImage"
         multiple
         onChange={(event) => {
-          setFieldValue("product_image", uploadImage(event));
+          setFieldValue("product_image", imgPayloadConvert(event));
         }}
-      />
-    </>
-  );
+      /> 
+      */
 }
-
-export default UploadImage;

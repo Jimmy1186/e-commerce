@@ -5,27 +5,26 @@ import { trpc } from "../../utils/trpc";
 import { Form, Formik } from "formik";
 import { z } from "zod";
 import { toFormikValidationSchema } from "zod-formik-adapter";
+const SunEditor = dynamic(() => import("suneditor-react"), {
+  ssr: false,
+});
 import {
   createProductType,
   initialValues,
   createProductSchema,
+  pImgType,
+  pImgStringType,
 } from "../../types/editor";
 import dynamic from "next/dynamic";
-import "suneditor/dist/css/suneditor.min.css"; // Import Sun Editor's CSS File
-// import { generateSignature } from "../../utils/cloudinarySign";
-// import Head from "next/head";
+import "suneditor/dist/css/suneditor.min.css"; 
+import Script from 'next/script'
+import Head from "next/head";
 import Image from "next/image";
 import UploadImage from "../../components/widget/UploadImage";
 
-declare global {
-  interface Window {
-    cloudinary: any;
-  }
-}
 
-const SunEditor = dynamic(() => import("suneditor-react"), {
-  ssr: false,
-});
+
+
 
 function htmlToElement(html: string) {
   var template = document.createElement("template");
@@ -49,12 +48,22 @@ function Index(props: any) {
   const saveProductMutation = trpc.admin.saveProduct.useMutation();
 
   const onSave = useCallback((values:createProductType) => {
-    saveProductMutation.mutate({
+
+
+      
+ saveProductMutation.mutate({
       product_title: values.product_title,
       product_category: Number(values.product_category),
       product_detail: values.product_detail,
-      product_image: values.product_image,
+      product_image: values.product_image
     });
+
+
+
+
+
+    
+   
   }, []);
 
   const [html, setHtml] = useState("");
@@ -97,47 +106,29 @@ function Index(props: any) {
 
   // }
 
-  // async function handleWidgetClick() {
-  //   const widget = window.cloudinary.createUploadWidget(
-  //     {
-  //       cloudName: process.env.NEXT_PUBLIC_CLOUDINARY_NAME,
-  //       uploadSignature: generateSignature,
-  //       apiKey: process.env.NEXT_PUBLIC_CLOUDINARY_KEY,
-  //       resourceType: "image",
-  //       folder: 'my_test'
-  //     },
-  //     (error: any, result: any) => {
-  //       if (!error && result && result.event === "success") {
-  //         console.log("Done! Here is the image info: ", result.info);
-
-  //         // setIsImageUploaded(true);
-  //       } else if (error) {
-  //         console.log(error);
-  //       }
-  //     }
-  //   );
-  //   widget.open();
-  // }
 
   const sumbitHandler = (values: createProductType, actions: any) => {
     // console.log(editorState);
     onSave(values)
     console.log(values);
+   
+
+
   };
 
   if (session?.user?.isAdmin || !session) {
     return <h1>無權限</h1>;
   }
-console.log(saveProductMutation.data)
+
   return (
     <>
-      {/* <Head>
-        <script
+     
+        <Script
           defer
           src="https://widget.cloudinary.com/v2.0/global/all.js"
           type="text/javascript"
-        ></script>
-      </Head> */}
+        ></Script>
+
       <Formik
         initialValues={initialValues}
         validationSchema={toFormikValidationSchema(createProductSchema)}
