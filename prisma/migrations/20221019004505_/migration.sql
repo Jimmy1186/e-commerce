@@ -5,12 +5,12 @@ CREATE TABLE `Account` (
     `type` VARCHAR(191) NOT NULL,
     `provider` VARCHAR(191) NOT NULL,
     `providerAccountId` VARCHAR(191) NOT NULL,
-    `refresh_token` VARCHAR(191) NULL,
-    `access_token` VARCHAR(191) NULL,
+    `refresh_token` TEXT NULL,
+    `access_token` TEXT NULL,
     `expires_at` INTEGER NULL,
     `token_type` VARCHAR(191) NULL,
     `scope` VARCHAR(191) NULL,
-    `id_token` VARCHAR(191) NULL,
+    `id_token` TEXT NULL,
     `session_state` VARCHAR(191) NULL,
 
     UNIQUE INDEX `Account_provider_providerAccountId_key`(`provider`, `providerAccountId`),
@@ -63,6 +63,7 @@ CREATE TABLE `Product_configuration` (
 CREATE TABLE `Product_image` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `img_path` VARCHAR(191) NOT NULL,
+    `index_of` TINYINT NOT NULL,
     `product_id` INTEGER NOT NULL,
 
     PRIMARY KEY (`id`)
@@ -86,7 +87,6 @@ CREATE TABLE `Product` (
     `product_img` VARCHAR(191) NULL,
     `category_id` INTEGER NOT NULL,
 
-    UNIQUE INDEX `Product_category_id_key`(`category_id`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -137,7 +137,7 @@ ALTER TABLE `Product_image` ADD CONSTRAINT `Product_image_product_id_fkey` FOREI
 ALTER TABLE `Product_item` ADD CONSTRAINT `Product_item_product_id_fkey` FOREIGN KEY (`product_id`) REFERENCES `Product`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Product` ADD CONSTRAINT `Product_category_id_fkey` FOREIGN KEY (`category_id`) REFERENCES `Product_category`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `Product` ADD CONSTRAINT `Product_category_id_fkey` FOREIGN KEY (`category_id`) REFERENCES `Product_category`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Product_category` ADD CONSTRAINT `Product_category_parent_category_id_fkey` FOREIGN KEY (`parent_category_id`) REFERENCES `Product_category`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;

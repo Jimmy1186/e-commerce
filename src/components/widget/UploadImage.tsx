@@ -37,6 +37,11 @@ function UploadImage({ values, setFieldValue }: uploadImgType) {
 
   return (
     <>
+      {values.product_image?(
+        values.product_image.map((v,i)=>{
+          return <Image key={i} src={v.img_path} height="250" width={250} />
+        })
+      ):("")}
       <div className="h-10 w-10 bg-red-500" onClick={handleWidgetClick}></div>
     </>
   );

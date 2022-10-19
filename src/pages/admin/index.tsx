@@ -5,65 +5,33 @@ import { trpc } from "../../utils/trpc";
 import { Form, Formik } from "formik";
 import { z } from "zod";
 import { toFormikValidationSchema } from "zod-formik-adapter";
-const SunEditor = dynamic(() => import("suneditor-react"), {
-  ssr: false,
-});
+import dynamic from "next/dynamic";
+import "suneditor/dist/css/suneditor.min.css";
+import Script from "next/script";
+import UploadImage from "../../components/widget/UploadImage";
+import CategorySelect from "../../components/widget/CategorySelect";
 import {
   createProductType,
   initialValues,
   createProductSchema,
-  pImgType,
-  pImgStringType,
 } from "../../types/editor";
-import dynamic from "next/dynamic";
-import "suneditor/dist/css/suneditor.min.css"; 
-import Script from 'next/script'
-import Head from "next/head";
-import Image from "next/image";
-import UploadImage from "../../components/widget/UploadImage";
+const SunEditor = dynamic(() => import("suneditor-react"), {
+  ssr: false,
+});
 
-
-
-
-
-function htmlToElement(html: string) {
-  var template = document.createElement("template");
-  html = html.trim(); // Never return a text node of whitespace as the result
-  template.innerHTML = html;
-  return template.content.firstChild;
-}
 
 function Index(props: any) {
   const { data: session } = useSession();
-  const [selectedImage, setSelectedImage] = useState<Array<Blob>>([]);
-
-  const {
-    data: category,
-    isError,
-    isLoading,
-  } = trpc.admin.getCategory.useQuery(undefined, {
-    staleTime: Infinity,
-  });
 
   const saveProductMutation = trpc.admin.saveProduct.useMutation();
 
-  const onSave = useCallback((values:createProductType) => {
-
-
-      
- saveProductMutation.mutate({
+  const onSave = useCallback((values: createProductType) => {
+    saveProductMutation.mutate({
       product_title: values.product_title,
       product_category: Number(values.product_category),
       product_detail: values.product_detail,
-      product_image: values.product_image
+      product_image: values.product_image,
     });
-
-
-
-
-
-    
-   
   }, []);
 
   const [html, setHtml] = useState("");
@@ -106,14 +74,10 @@ function Index(props: any) {
 
   // }
 
-
   const sumbitHandler = (values: createProductType, actions: any) => {
     // console.log(editorState);
-    onSave(values)
+    onSave(values);
     console.log(values);
-   
-
-
   };
 
   if (session?.user?.isAdmin || !session) {
@@ -122,12 +86,11 @@ function Index(props: any) {
 
   return (
     <>
-     
-        <Script
-          defer
-          src="https://widget.cloudinary.com/v2.0/global/all.js"
-          type="text/javascript"
-        ></Script>
+      <Script
+        defer
+        src="https://widget.cloudinary.com/v2.0/global/all.js"
+        type="text/javascript"
+      ></Script>
 
       <Formik
         initialValues={initialValues}
@@ -149,7 +112,7 @@ function Index(props: any) {
               </div>
               <div className="">
                 <p>{JSON.stringify(errors)}</p>
-                <h1>Upload and Display Image usign React Hook's</h1>
+             
 
                 <UploadImage values={values} setFieldValue={setFieldValue} />
               </div>
@@ -167,31 +130,7 @@ function Index(props: any) {
                 />
               </div>
 
-              {errors.product_category}
-              <select
-                title="category"
-                className="select select-bordered w-full max-w-xs"
-                name="product_category"
-                onChange={handleChange}
-              >
-                {category ? (
-                  category.map((v, i) => {
-                    return (
-                      <option
-                        key={i}
-                        disabled={v.parent_category_id === null}
-                        value={v.id}
-                      >
-                        {v.category_name}
-                      </option>
-                    );
-                  })
-                ) : (
-                  <option disabled defaultValue={0}>
-                    Loading...
-                  </option>
-                )}
-              </select>
+              <CategorySelect errors={errors} handleChange={handleChange} />
               <div className="w-full">
                 <SunEditor
                   lang="en"

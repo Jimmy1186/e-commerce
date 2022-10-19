@@ -2,13 +2,41 @@ import { z } from "zod";
 import { authedProcedure, t } from "../trpc";
 
 export const adminSettingRouter = t.router({
-  getCategory: authedProcedure.query(({ ctx }) => {
+  getCategory: authedProcedure.query(async({ ctx }) => {
+    // let catA =[]
+
+
     try {
-      return ctx.prisma.product_category.findMany({});
+      const all  = await ctx.prisma.product_category.findMany({});
+      return all
+//       all.forEach((v,i) => {
+        
+//       });
+
+
+// console.log(all)
+
+
+
+
     } catch (e) {
       console.dir(e);
     }
   }),
+  addCategory: authedProcedure
+    .input(
+      z.object({
+        parent_category_id: z.number().nullable(),
+        c_name: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        console.log(input, ctx);
+      } catch (e) {
+        console.log(e);
+      }
+    }),
   saveProduct: authedProcedure
     .input(
       z.object({
@@ -26,12 +54,6 @@ export const adminSettingRouter = t.router({
     .mutation(async ({ input, ctx }) => {
       const { product_title, product_category, product_detail, product_image } =
         input;
-      // const imagePayload = await product_image.map((v, i) => {
-      //   return {
-      //     img_path: v.img_path,
-      //     index_of: v.index_of,
-      //   };
-      // });
 
       try {
         await ctx.prisma.product.create({
@@ -45,13 +67,10 @@ export const adminSettingRouter = t.router({
               },
             },
           },
-          // select:{
-          //   product_images:true
-          // }
         });
         return { as: "should success" };
       } catch (e) {
-        console.log(e)
+        console.log(e);
       }
     }),
 });
