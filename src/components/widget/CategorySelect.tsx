@@ -1,13 +1,14 @@
 import { preview } from "@cloudinary/url-gen/actions/videoEdit";
-import React, { useState,useCallback } from "react";
+import React, { useState, useCallback } from "react";
+import { createProductType } from "../../types/editor";
 import { trpc } from "../../utils/trpc";
 
 type categoryType = {
   errors: any;
   handleChange: (v: any) => void;
+  setFieldValue: (name: string, v: number) => void;
+  values:createProductType
 };
-
-
 
 type conpomentListType = {
   id: number;
@@ -19,9 +20,11 @@ type conpomentListType = {
   nextCat: (id: number, level: number, catLength: number) => void;
   level: number;
   catLength: number;
+  setFieldValue: (name: string, v: number) => void;
+
 };
 
-function CategorySelect({ errors, handleChange }: categoryType) {
+function CategorySelect({ errors, handleChange, setFieldValue,values }: categoryType) {
   const [cat, setCat] = useState<Array<number>>([]);
   const [levelState, setLevelState] = useState<number>(0);
   const {
@@ -31,29 +34,13 @@ function CategorySelect({ errors, handleChange }: categoryType) {
   } = trpc.admin.getCategory.useQuery(undefined, {
     staleTime: Infinity,
   });
-  const addCategoryMutation = trpc.admin.addCategory.useMutation()
+  const addCategoryMutation = trpc.admin.addCategory.useMutation();
 
   const clearV = () => {
     setLevelState(0);
     setCat([]);
   };
-
-
-
-
-
-
-
-  const onAddCate = useCallback(()=>{
-
-  },[addCategoryMutation])
-
-
-
-
-
-
-
+ 
   const nextCat = (id: number, level: number, catLength: number) => {
     // console.log("-----------------------------")
     // console.log("cat :"+ cat)
@@ -61,20 +48,18 @@ function CategorySelect({ errors, handleChange }: categoryType) {
     // console.log("catleng :" + catLength);
     // console.log("levelState :" + levelState);
 
-
     if (level != 0) {
-   
-        if (level - levelState === 0) {
-            setCat(cat.slice(0,-1))
-            setCat((prev) => [...prev, id]);
-            return;
-          }
-      
-      if (level - levelState <0) {
-        setCat(cat.slice(0,-1))
+      if (level - levelState === 0) {
+        setCat(cat.slice(0, -1));
+        setCat((prev) => [...prev, id]);
         return;
       }
-    
+
+      if (level - levelState < 0) {
+        setCat(cat.slice(0, -1));
+        return;
+      }
+
       if (level < catLength && level != levelState) {
         setCat((prev) => [...prev, id]);
       }
@@ -86,8 +71,6 @@ function CategorySelect({ errors, handleChange }: categoryType) {
   };
 
 
-  
-
   if (category === undefined) {
     return <>loading</>;
   }
@@ -97,54 +80,57 @@ function CategorySelect({ errors, handleChange }: categoryType) {
         Cler
       </div>
       {errors.product_category}
-      <div className="flex w-full gap-3">
-        <ul className="flex w-36 flex-col gap-3 bg-white p-5">
-          {category.flatMap((v, i) => {
-            return v.parent_category_id === null ? (
-              <li
-                key={v.id}
-                className="w-full text-lg"
-                onClick={() => nextCat(v.id, 0, 1)}
-              >
-                {v.category_name}
-              </li>
-            ) : (
-              []
+      <div className="">
+        <div className="flex w-full gap-3">
+          <ul className="flex w-36 flex-col gap-3 bg-white p-5">
+            {category.flatMap((v, i) => {
+              return v.parent_category_id === null ? (
+                <li key={v.id} className="flex w-full justify-between text-lg">
+                  <p onClick={() => setFieldValue("product_category", v.id)}>
+                    {v.category_name}
+                  </p>
+
+                  <div className="" onClick={() => nextCat(v.id, 0, 1)}>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="h-6 w-6"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M8.25 4.5l7.5 7.5-7.5 7.5"
+                      />
+                    </svg>
+                  </div>
+                </li>
+              ) : (
+                []
+              );
+            })}
+          </ul>
+
+          {cat.map((v, i) => {
+            return (
+              <ChildCat
+                key={i}
+                id={v}
+                catelist={category}
+                nextCat={nextCat}
+                setFieldValue={setFieldValue}
+                catLength={cat.length + 1}
+                level={i + 1}
+              />
             );
           })}
-<li className="relative bottom-0" onClick={()=>{}}>
-<label htmlFor="my-modal-4" className="btn modal-button">新增分類</label>
-    </li>
-  
-        </ul>
+        </div>
 
-        {cat.map((v, i) => {
-          return (
-            <ChildCat
-            key={i}
-              id={v}
-              catelist={category}
-              nextCat={nextCat}
-              catLength={cat.length + 1}
-              level={i + 1}
-            />
-          );
-        })}
-
-
-
-
-
-<input type="checkbox" id="my-modal-4" className="modal-toggle" />
-<label htmlFor="my-modal-4" className="modal cursor-pointer">
-  <label className="modal-box relative" >
-    <h3 className="text-lg font-bold">新增分類</h3>
-    <p className="py-4 flex  gap-3">
-    <input type="text" placeholder="Type here" className="input input-bordered w-full max-w-xs" /> 
-    <button className="btn btn-outline" name="category">Button</button>
-    </p>
-  </label>
-</label>
+        <div className="">
+          <p>目前已選擇的 : {category.find(v=>v.id===values.product_category)?.category_name}</p>
+        </div>
       </div>
     </>
   );
@@ -158,24 +144,42 @@ function ChildCat({
   nextCat,
   level,
   catLength,
+  setFieldValue,
 }: conpomentListType) {
   return (
     <ul className="flex w-36 flex-col gap-3 bg-white p-5">
       {catelist.flatMap((v, i) => {
         return v.parent_category_id === id ? (
-          <li
-            key={v.id}
-            onClick={() => nextCat(v.id, level, catLength)}
-            className="bg-stone-200 "
-          >
-            {v.category_name}
+          <li key={v.id} className="flex justify-between">
+            <div
+              className=""
+              onClick={() => setFieldValue("product_category", v.id)}
+            >
+              {" "}
+              {v.category_name}
+            </div>
+
+            <div className="" onClick={() => nextCat(v.id, level, catLength)}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="h-6 w-6"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M8.25 4.5l7.5 7.5-7.5 7.5"
+                />
+              </svg>
+            </div>
           </li>
         ) : (
           []
         );
       })}
-
-   
     </ul>
   );
 }

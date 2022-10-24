@@ -15,6 +15,7 @@ import {
   initialValues,
   createProductSchema,
 } from "../../types/editor";
+import DraggableList from "../../components/widget/DraggableList";
 const SunEditor = dynamic(() => import("suneditor-react"), {
   ssr: false,
 });
@@ -76,7 +77,7 @@ function Index(props: any) {
 
   const sumbitHandler = (values: createProductType, actions: any) => {
     // console.log(editorState);
-    onSave(values);
+    // onSave(values);
     console.log(values);
   };
 
@@ -115,6 +116,9 @@ function Index(props: any) {
              
 
                 <UploadImage values={values} setFieldValue={setFieldValue} />
+                <div className="">
+                 {/* <DraggableList items={values.product_image} /> */}
+              </div>
               </div>
               <div className="divider"></div>
               <div className="flex items-center gap-3">
@@ -129,8 +133,14 @@ function Index(props: any) {
                   className="input input-bordered w-full max-w-xs"
                 />
               </div>
+            
+             
+              <CategorySelect 
+              errors={errors} 
+              handleChange={handleChange}
+              setFieldValue={setFieldValue}
+              values={values}/>
 
-              <CategorySelect errors={errors} handleChange={handleChange} />
               <div className="w-full">
                 <SunEditor
                   lang="en"

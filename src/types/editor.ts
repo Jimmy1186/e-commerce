@@ -7,14 +7,14 @@ declare global {
 
 export const initialValues = {
   product_title: "",
-  product_category: "",
+  product_category: null,
   product_detail:"",
   product_image:[]
 };
 
 export const createProductSchema = z.object({
   product_title: z.string(),
-  product_category: z.string(),
+  product_category: z.number().nullable(),
   product_detail: z.any(),
   product_image:z.array(
     z.object({

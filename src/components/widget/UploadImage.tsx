@@ -3,6 +3,9 @@ import Image from "next/image";
 import { createProductType, uploadImgType } from "../../types/editor";
 import { imgPayloadConvert } from "../../utils/functions";
 import { generateSignature } from "../../utils/cloudinarySign";
+import { useRef } from 'react'
+import { useDrag } from '@use-gesture/react'
+
 
 function UploadImage({ values, setFieldValue }: uploadImgType) {
   async function handleWidgetClick() {
@@ -20,7 +23,7 @@ function UploadImage({ values, setFieldValue }: uploadImgType) {
     
           const oldV     =  values.product_image
           const newV = [...oldV,{ img_path: result.info.url, index_of: 0 }]
-
+          //const newV = [...oldV,result.info.url]
        
 
           setFieldValue("product_image",newV);
@@ -37,11 +40,11 @@ function UploadImage({ values, setFieldValue }: uploadImgType) {
 
   return (
     <>
-      {values.product_image?(
+      {/* {values.product_image?(
         values.product_image.map((v,i)=>{
-          return <Image key={i} src={v.img_path} height="250" width={250} />
+          return <div className="w-36 h-36 relative" key={i}><Image src={v.img_path} objectFit="cover" layout="fill"/></div>
         })
-      ):("")}
+      ):("")} */}
       <div className="h-10 w-10 bg-red-500" onClick={handleWidgetClick}></div>
     </>
   );

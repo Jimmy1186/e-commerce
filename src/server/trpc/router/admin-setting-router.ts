@@ -3,21 +3,10 @@ import { authedProcedure, t } from "../trpc";
 
 export const adminSettingRouter = t.router({
   getCategory: authedProcedure.query(async({ ctx }) => {
-    // let catA =[]
-
 
     try {
       const all  = await ctx.prisma.product_category.findMany({});
       return all
-//       all.forEach((v,i) => {
-        
-//       });
-
-
-// console.log(all)
-
-
-
 
     } catch (e) {
       console.dir(e);
@@ -32,9 +21,30 @@ export const adminSettingRouter = t.router({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        console.log(input, ctx);
+        await ctx.prisma.product_category.create({
+          data:{
+            category_name: input.c_name,
+            parent_category_id:input.parent_category_id
+          }
+        })
+        console.log(input);
       } catch (e) {
         console.log(e);
+      }
+    }),
+    deleteCategory:authedProcedure.input(
+      z.object({
+        id:z.number()
+      })
+    ).mutation(async({ctx,input})=>{
+      try{
+        return await ctx.prisma.product_category.delete({
+          where:{
+            id:input.id
+          }
+        })
+      }catch{
+
       }
     }),
   saveProduct: authedProcedure
